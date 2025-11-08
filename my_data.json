@@ -15,11 +15,11 @@
       "id": "3"
     },
     {
-      "id": "4",
-      "name": "Bob",
-      "age": 22,
-      "major": "Chemistry",
-      "grade": "C"
+      "name": "NewStudents",
+      "age": "30",
+      "major": "Chemical",
+      "grade": "F",
+      "id": "4"
     },
     {
       "id": "5",
@@ -75,6 +75,13 @@
       "name": "Doe",
       "age": "29",
       "major": "ComputerScience",
+      "grade": "A"
+    },
+    {
+      "id": "9880",
+      "name": "New",
+      "age": "11",
+      "major": "Electronic",
       "grade": "A"
     }
   ]
