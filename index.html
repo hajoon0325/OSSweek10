@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>AJAX CRUD 프로그램</title>
+</head>
+<body>
+  <h1>학생 데이터 관리</h1>
+
+  <button id="btnStu">학생 목록 불러오기</button>
+
+  <h2>학생 추가/수정</h2>
+  <input id="name" placeholder="이름">
+  <input id="age" placeholder="나이">
+  <input id="major" placeholder="전공">
+  <input id="grade" placeholder="학점">
+  <button id="btnAdd">학생 추가</button>
+  <button id="btnUpdate">학생 수정 변경하기</button>
+
+  <div id="contents"></div>
+
+  <script>
+    const API_URL = "http://localhost:3000/students";
+    let editId = null;
+
+    window.onload = function () {
+      document.getElementById("btnStu").addEventListener("click", getStudents);
+      document.getElementById("btnAdd").addEventListener("click", postData);
+      document.getElementById("btnUpdate").addEventListener("click", updateStudent);
+    };
+
+    function getStudents() {
+      const xhr = new XMLHttpRequest();
+      xhr.open("GET", API_URL);
+      xhr.send();
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          const res = JSON.parse(xhr.response);
+          document.getElementById("contents").innerHTML = makeList(res);
+        } else {
+          console.error("GET 실패:", xhr.status, xhr.statusText);
+        }
+      };
+    }
+
+    function postData() {
+      const name = document.getElementById("name").value;
+      const age = document.getElementById("age").value;
+      const major = document.getElementById("major").value;
+      const grade = document.getElementById("grade").value;
+
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", API_URL);
+      xhr.setRequestHeader("Content-Type", "application/json");
+      xhr.send(JSON.stringify({ name, age, major, grade }));
+      xhr.onload = () => {
+        if (xhr.status === 201) {
+          getStudents();
+          clearForm();
+        } else {
+          console.error("POST 실패:", xhr.status, xhr.statusText);
+        }
+      };
+    }
+
+    function editStudent(id) {
+      const xhr = new XMLHttpRequest();
+      xhr.open("GET", `${API_URL}/${id}`);
+      xhr.send();
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          const stu = JSON.parse(xhr.response);
+          document.getElementById("name").value = stu.name;
+          document.getElementById("age").value = stu.age;
+          document.getElementById("major").value = stu.major;
+          document.getElementById("grade").value = stu.grade;
+          editId = id;
+        }
+      };
+    }
+
+    function updateStudent() {
+      if (!editId) {
+        alert("수정할 학생을 먼저 선택하세요!");
+        return;
+      }
+      const name = document.getElementById("name").value;
+      const age = document.getElementById("age").value;
+      const major = document.getElementById("major").value;
+      const grade = document.getElementById("grade").value;
+
+      const xhr = new XMLHttpRequest();
+      xhr.open("PUT", `${API_URL}/${editId}`);
+      xhr.setRequestHeader("Content-Type", "application/json");
+      xhr.send(JSON.stringify({ name, age, major, grade }));
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          getStudents();
+          clearForm();
+          editId = null;
+        } else {
+          console.error("PUT 실패:", xhr.status, xhr.statusText);
+        }
+      };
+    }
+
+    function deleteStudent(id) {
+      const xhr = new XMLHttpRequest();
+      xhr.open("DELETE", `${API_URL}/${id}`);
+      xhr.send();
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          getStudents();
+        } else {
+          console.error("DELETE 실패:", xhr.status, xhr.statusText);
+        }
+      };
+    }
+
+    function makeList(data) {
+      let output = "<ul>";
+      for (let i = 0; i < data.length; i++) {
+        output += `<li>
+          ${data[i].name} (${data[i].age}, ${data[i].major}, ${data[i].grade})
+          <button onclick="editStudent(${data[i].id})">수정 준비</button>
+          <button onclick="deleteStudent(${data[i].id})">삭제</button>
+        </li>`;
+      }
+      output += "</ul>";
+      return output;
+    }
+
+    function clearForm() {
+      document.getElementById("name").value = "";
+      document.getElementById("age").value = "";
+      document.getElementById("major").value = "";
+      document.getElementById("grade").value = "";
+    }
+  </script>
+</body>
+</html>
